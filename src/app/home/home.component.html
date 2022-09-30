@@ -21,7 +21,7 @@
   />
   <div class="navbar-nav">
     <div class="nav-item text-nowrap">
-      <a class="nav-link px-3" href="#">Sign out</a>
+      <a class="nav-link px-3" href="#" (click)="logOut()">Sign out</a>
     </div>
   </div>
 </header>
@@ -93,10 +93,16 @@
                   class="btn btn-primary bt-sm"
                   data-bs-toggle="modal"
                   data-bs-target="#exampleModal"
+                  *ngIf="user.role == 'Admin'"
                   (click)="updateRecord(record)"
                   >Update</Button
                 >
-                <Button class="btn btn-primary bt-sm">Delete</Button>
+                <Button
+                  class="btn btn-primary bt-sm"
+                  *ngIf="user.role == 'Admin'"
+                  (click)="deleteRecord(record.id)"
+                  >Delete</Button
+                >
               </td>
             </tr>
           </tbody>
@@ -113,7 +119,9 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            <h5 class="modal-title" id="exampleModalLabel">
+              {{ isEdit ? "Update Record" : "Create record" }}
+            </h5>
             <button
               type="button"
               class="btn-close"
@@ -147,10 +155,13 @@
                 <label for="floatingInput">Province</label>
               </div>
 
-              <div class="checkbox mb-3">
-                <label>
-                  <input type="checkbox" value="remember-me" /> Remember me
-                </label>
+              <div class="form-floating" *ngIf="user.role == 'Admin'">
+                <select formControlName="status" class="form-control">
+                  <option value="lost">Lost</option>
+                  <option value="found">Found</option>
+                  <option value="collected">Collected</option>
+                </select>
+                <label for="floatingInput">Status</label>
               </div>
             </form>
           </div>
@@ -166,7 +177,7 @@
             <button
               type="button"
               [disabled]="loading"
-              (click)="save()"
+              (click)="isEdit ? submitUpdate() : save()"
               class="btn btn-primary"
             >
               {{ loading ? "Loading..." : "Save" }}

@@ -1,5 +1,6 @@
 import { Component, OnInit, ɵAPP_ID_RANDOM_PROVIDER } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -11,6 +12,7 @@ export class HomeComponent implements OnInit {
 
   records: any = [];
   isEdit = false;
+  user: any;
   recordForm: FormGroup = new FormGroup({
     createdBy: new FormControl("Blessing Mwale"),
     description: new FormControl(""),
@@ -18,12 +20,14 @@ export class HomeComponent implements OnInit {
     random: new FormControl(""),
     status: new FormControl("lost"),
     updatedBy: new FormControl("Blessing Mwale"),
+    id: new FormControl()
   });
   loading = false;
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
     this.getRecords()
+    this.user = this.authService.getUser();
   }
 
   save() {
@@ -56,6 +60,7 @@ export class HomeComponent implements OnInit {
   }
 
   updateRecord(record: any) {
+    this.isEdit = true
     this.recordForm.patchValue({
       createdBy: record.createdBy,
       description: record.description,
@@ -63,7 +68,40 @@ export class HomeComponent implements OnInit {
       random: record.random,
       status: record.status,
       updatedBy: record.createdBy,
+      id: record.id
     })
+  }
+
+  submitUpdate() {
+
+    this.authService.updateRecord(this.recordForm.value).subscribe(response => {
+      console.log(response);
+      document.getElementById('closeBtn')?.click();
+      // this.router.navigateByUrl('/login')
+      this.isEdit = false
+
+      this.getRecords();
+    }, error => {
+      console.log(error);
+      this.loading = false
+    })
+  }
+  logOut() {
+    localStorage.clear();
+    this.router.navigateByUrl('/login')
+  }
+
+  deleteRecord(id: any) {
+    if (confirm("Are you sure you wnt to delete this record?")) {
+      this.authService.deleteRecord(id).subscribe(response => {
+        console.log(response);
+        this.getRecords();
+      }, error => {
+        console.log(error);
+        this.loading = false
+      })
+    }
+
   }
 
 

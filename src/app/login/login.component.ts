@@ -10,30 +10,38 @@ import { AuthService } from '../services/auth.service';
 })
 export class LoginComponent implements OnInit {
 
+  message = "";
+  loading = false;
   userForm: FormGroup = new FormGroup({
 
     password: new FormControl(""),
 
     username: new FormControl(""),
   });
-  constructor(private authService: AuthService, private router:Router) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit(): void {
   }
 
   login() {
-    this.authService.getRandomNumber().subscribe((number : any)=> {
+    this.loading = true;
+    this.authService.getRandomNumber().subscribe((number: any) => {
       this.userForm.patchValue({
-        random:number[0]
+        random: number[0]
       })
       this.authService.login(this.userForm.value).subscribe(response => {
         console.log(response);
+        this.loading = false
+        localStorage.setItem("user", JSON.stringify(response))
         this.router.navigateByUrl('/')
       }, error => {
+        this.loading = false
+        this.message = "Something went try again"
         console.log(error);
       })
     })
-  
+
   }
 
+  
 }
